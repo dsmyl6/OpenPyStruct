@@ -1070,7 +1070,7 @@ cbar_I.ax.tick_params(labelsize=10)
 # Set plot titles and labels
 ax_I.set_title("Beam Setup with Applied Forces and I",
              fontsize=18, fontweight='bold', pad=20)
-ax_I.set_ylabel("I (m$^4$)", fontsize=14, fontweight='semibold')
+
 ax_I.set_xlim(-5, L_beam + 5)
 ax_I.set_ylim(-2.5, 2.5)  # Adjusted to accommodate I blocks
 ax_I.set_xticks(np.arange(0, L_beam + 5, 5))
