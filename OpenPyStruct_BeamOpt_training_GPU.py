@@ -1,0 +1,337 @@
+################################################################
+#### OpenPyStruct GPU-Accelerated Single-Core Optimizer / Data Generator ####
+#### Coder: Danny Smyl, PhD, PE, Georgia Tech, 2025         ####
+################################################################
+
+import os
+import openseespy.opensees as ops
+import numpy as np
+import random
+import torch
+import json
+from torch.optim.lr_scheduler import ExponentialLR
+import time
+from tqdm import tqdm  # Progress bar library
+
+##############
+# Parameters #
+##############
+
+# Material Properties
+E = 200e9                     # Young's Modulus (Pa)
+nu = 0.3                      # Poisson ratio
+G = E / (2 * (1 + nu))        # Shear modulus (Pa)
+A = 0.01                      # Cross-sectional area (m^2)
+
+# Geometry Parameters
+L_max = 200.0                 # Maximum length of the beam (m)
+num_nodes = 101               # Number of nodes
+num_elements = num_nodes - 1  # Number of elements
+N_rollers_max = 4             # Maximum number of additional roller supports
+M_forces_max = 4              # Maximum number of point forces
+L_min = 15                    # Minimum distance between rollers (m)
+
+# Load Parameters
+max_force = -355857           # Maximum point load (N) - approximately 80,000 lb
+min_force = max_force / 10
+uniform_udl = -1000           # Uniformly distributed load (N)
+
+# Initial Guess
+I_0 = 0.5                     # Initial guess for Moments of Inertia (I)
+
+## Optimization Parameters ##
+max_e = 600                   # Maximum number of epochs
+lr = 0.01                     # Initial optimization learning rate
+gamma = 0.98                  # Learning rate decay rate
+alpha_moment = 1e-2           # Coefficient for bending energy loss term
+alpha_shear = 1e-2            # Coefficient for shear energy loss term
+
+# Stopping Criterion Parameters #
+tolerance = 1e-2              # Minimum improvement in loss
+patience = 100                # Number of epochs to wait for improvement before stopping
+
+# Data Generation Parameters #
+num_samples = 100000          # Number of training data samples to generate
+random_bridge = 0             # Set to 1 to randomize bridge length and roller locations
+flag = random_bridge          # Flag for generating fixed or random bridge
+
+#################################################################################################
+##   Generate a random geometry and support condition (only used if not randomizing a bridge)  ##
+#################################################################################################
+
+# Fixed Bridge Configuration
+L = L_max
+node_positions = np.linspace(0, L, num_nodes)
+
+# Fixed roller node locations (assuming node numbering starts at 1)
+roller_nodes = [10, 30, 70, 85, num_nodes - 1]  # Node indices
+available_nodes = list(range(2, num_nodes))    # Exclude node 1
+for node in roller_nodes:
+    if node in available_nodes:
+        available_nodes.remove(node)
+
+#################################################################################################
+#################################################################################################
+#################################################################################################
+
+# Training data structure
+training_data = {
+    "roller_x_locations": [],
+    "force_x_locations": [],
+    "force_values": [],
+    "I_values": [],
+    "shear_forces": [],
+    "bending_moments": [],
+    "node_positions": [],
+    "roller_nodes": [],
+    "force_nodes": [],
+    "num_nodes": [],
+    "L": [],
+    "rotations": [],
+    "deflections": [],
+}
+
+def setup_model(I_tensor, node_positions, roller_nodes, force_nodes, force_values, A, E, uniform_udl):
+    """
+    Set up the OpenSees model using updated moments of inertia and apply uniform UDL to all elements.
+    """
+    ops.model('basic', '-ndm', 2, '-ndf', 3)
+
+    # Define nodes
+    for i, x in enumerate(node_positions):
+        ops.node(i + 1, x, 0.0)
+
+    # Apply supports
+    ops.fix(1, 1, 1, 0)  # First node (constrained in X-Y, rotationally free)
+    for node in roller_nodes:
+        ops.fix(node, 0, 1, 0)  # All other nodes (rotationally free, free in X)
+
+    # Define elements with updated moments of inertia
+    ops.geomTransf('Linear', 1)
+    for i in range(len(node_positions) - 1):
+        ops.element('elasticBeamColumn', i + 1, i + 1, i + 2, A, E, I_tensor[i].item(), 1)
+
+    # Apply point loads
+    ops.timeSeries('Linear', 1)
+    ops.pattern('Plain', 1, 1)
+    for node, force in zip(force_nodes, force_values):
+        ops.load(node, 0.0, force, 0.0)
+
+    # Apply uniform UDL to all elements
+    for elem_id in range(1, len(node_positions)):
+        ops.eleLoad('-ele', elem_id, '-type', '-beamUniform', uniform_udl, uniform_udl)
+
+    # Static analysis setup
+    ops.system('BandSPD')
+    ops.numberer('RCM')
+    ops.constraints('Plain')
+    ops.integrator('LoadControl', 1.0)
+    ops.algorithm('Linear')
+
+def generate_sample(sample_idx, num_nodes, flag, L, node_positions, roller_nodes, available_nodes, patience=100, device='cpu'):
+    """
+    Generate a single sample for training data with optimized OpenSeesPy modeling and early stopping.
+    """
+    import openseespy.opensees as ops  # Import inside function
+
+    # Initialize OpenSees model
+    ops.wipe()
+
+    # Random bridge length / rollers/ nodes
+    if flag == 1:
+        L_sample = L_min + random.uniform(0, L_max)
+        node_positions_sample = np.linspace(0, L_sample, num_nodes)
+
+        # Randomize roller node locations
+        roller_nodes_sample, available_nodes_sample = [], list(range(2, num_nodes))  # Exclude node 1
+        num_rollers = random.randint(1, N_rollers_max)
+
+        # Add first roller node
+        first_roller_node = random.choice(available_nodes_sample)
+        roller_nodes_sample.append(first_roller_node)
+        available_nodes_sample.remove(first_roller_node)
+
+        # Add additional rollers without minimum distance constraint
+        for _ in range(num_rollers - 1):
+            if available_nodes_sample:  # Ensure there are available nodes
+                new_roller_node = random.choice(available_nodes_sample)
+                roller_nodes_sample.append(new_roller_node)
+                available_nodes_sample.remove(new_roller_node)
+    else:
+        roller_nodes_sample = roller_nodes.copy()
+        available_nodes_sample = available_nodes.copy()
+        node_positions_sample = node_positions.copy()
+        L_sample = L
+
+    # Randomize point forces and their values
+    num_forces = random.randint(1, M_forces_max)
+    num_forces = min(num_forces, len(available_nodes_sample))
+    force_nodes = random.sample(available_nodes_sample, num_forces)
+    force_values = [random.uniform(min_force, max_force) for _ in force_nodes]
+
+    # Initialize moments of inertia tensor on the specified device
+    I_tensor = torch.tensor([I_0] * num_elements, dtype=torch.float32, requires_grad=True, device=device)
+
+    # Setup optimizer and scheduler
+    optimizer = torch.optim.Adam([I_tensor], lr=lr)
+    scheduler = ExponentialLR(optimizer, gamma=gamma)
+
+    # Optimization loop with early stopping
+    best_loss = float('inf')
+    patience_counter = 0
+
+    for epoch in range(1, max_e + 1):
+        optimizer.zero_grad()
+        ops.wipe()  # Reset OpenSees model
+
+        setup_model(I_tensor, node_positions_sample, roller_nodes_sample, force_nodes, force_values, A, E, uniform_udl)
+
+        ops.analysis('Static')
+        try:
+            ops.analyze(1)
+        except Exception as e:
+            print(f"OpenSees analysis failed for sample {sample_idx+1} at epoch {epoch}: {e}")
+            break  # Skip to the next sample
+
+        # Compute losses
+        try:
+            bending_moments = torch.tensor(
+                [ops.eleResponse(i, 'forces')[2] for i in range(1, len(I_tensor) + 1)],
+                dtype=torch.float32,
+                device=device
+            )
+            shear_forces = torch.tensor(
+                [ops.eleResponse(i, 'forces')[1] for i in range(1, len(I_tensor) + 1)],
+                dtype=torch.float32,
+                device=device
+            )
+        except Exception as e:
+            print(f"Failed to retrieve responses for sample {sample_idx+1} at epoch {epoch}: {e}")
+            break  # Skip to the next sample
+
+        bending_energy = torch.sum((bending_moments ** 2) / (2 * E * I_tensor + 1e-6))
+        A_approx = 0.03 * I_tensor ** 0.5
+        shear_energy = torch.sum(shear_forces ** 2 / (G * A_approx))
+        primary_loss = torch.sum(I_tensor)
+        total_loss = primary_loss + alpha_moment * bending_energy + alpha_shear * shear_energy
+
+        # Backpropagate and update
+        total_loss.backward()
+        optimizer.step()
+        scheduler.step()
+
+        # Prevent negative inertia values
+        with torch.no_grad():
+            I_tensor.clamp_(min=1e-8)
+
+        # Early stopping logic
+        if total_loss.item() < best_loss - tolerance:
+            best_loss = total_loss.item()
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if patience_counter >= patience:
+            break
+
+        # Print progress every 100 epochs
+        if epoch % 100 == 0:
+            print(f"Sample {sample_idx+1}/{num_samples} - Epoch {epoch}/{max_e} - Loss: {total_loss.item():.4f}")
+
+    # Extract rotations and deflections
+    rotations = []
+    deflections = []
+    for i in range(1, len(node_positions_sample) + 1):
+        try:
+            rotations.append(ops.nodeDisp(i, 3))
+        except:
+            rotations.append(0.0)
+        try:
+            deflections.append(ops.nodeDisp(i, 2))
+        except:
+            deflections.append(0.0)
+
+    # Detach tensors and move to CPU for storage
+    I_values_cpu = I_tensor.detach().cpu().numpy().tolist()
+    shear_forces_cpu = shear_forces.detach().cpu().tolist()
+    bending_moments_cpu = bending_moments.detach().cpu().tolist()
+
+    # Return the results
+    return {
+        "roller_x_locations": [node_positions_sample[node - 1] for node in roller_nodes_sample],
+        "force_x_locations": [node_positions_sample[node - 1] for node in force_nodes],
+        "force_values": force_values,
+        "I_values": I_values_cpu,
+        "shear_forces": shear_forces_cpu,
+        "bending_moments": bending_moments_cpu,
+        "node_positions": node_positions_sample.tolist(),
+        "roller_nodes": roller_nodes_sample,
+        "force_nodes": force_nodes,
+        "num_nodes": num_nodes,
+        "L": L_sample,
+        "rotations": rotations,
+        "deflections": deflections,
+    }
+
+def main():
+    start_time = time.time()  # Start the timer
+
+    # Determine the device to use (GPU if available, else CPU)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+
+    # Initialize progress bar for sample generation
+    with tqdm(total=num_samples, desc="Generating Samples") as pbar:
+        for i in range(num_samples):
+            result = generate_sample(
+                i,
+                num_nodes,
+                flag,
+                L,
+                node_positions,
+                roller_nodes,
+                available_nodes,
+                patience=patience,
+                device=device
+            )
+            for key, value in result.items():
+                training_data[key].append(value)
+            pbar.update(1)  # Update the progress bar
+
+    # Save the training data to a JSON file
+    with open("training_data_PINN_mini.json", "w") as f:
+        json.dump(training_data, f)
+
+    end_time = time.time()  # End the timer
+
+    print("Data generation complete.")
+    print(f"Total execution time: {end_time - start_time:.2f} seconds")
+
+if __name__ == "__main__":
+    main()
+
+# For sanity: Load the training data from the JSON file #
+with open("training_data_PINN_mini.json", "r") as file:
+    training_data = json.load(file)
+
+# Print a summary of the dataset
+print("Data loaded successfully!")
+print(f"Number of samples: {len(training_data['roller_x_locations'])}")
+print("Keys available in the dataset:")
+for key in training_data.keys():
+    print(f"- {key} (Number of entries: {len(training_data[key])})")
+
+# Access all data into variables
+roller_x_locations = training_data["roller_x_locations"]
+force_x_locations = training_data["force_x_locations"]
+force_values = training_data["force_values"]
+I_values = training_data["I_values"]
+shear_forces = training_data["shear_forces"]
+bending_moments = training_data["bending_moments"]
+node_positions = training_data["node_positions"]
+roller_nodes = training_data["roller_nodes"]
+force_nodes = training_data["force_nodes"]
+num_nodes = training_data["num_nodes"]
+beam_lengths = training_data["L"]
+rotations = training_data["rotations"]
+deflections = training_data["deflections"]
