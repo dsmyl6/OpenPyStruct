@@ -1,5 +1,5 @@
 **OpenPyStruct**
-OpenPyStruct is an open-source toolkit designed for machine learning-based structural optimization. Leveraging Physics-Informed Neural Networks (PINNs), Transformer-Diffusion Modules, and other state-of-the-art techniques, the framework offers unparalleled capabilities for tackling single and multi-load case optimization problems with diverse boundary and loading conditions.
+OpenPyStruct is an open-source toolkit designed for machine learning-based structural optimization. Leveraging Physics-Informed Neural Networks (PINNs), Transformer-Diffusion Modules, and other state-of-the-art techniques, the framework offers unparalleled capabilities for tackling single and multi-load case optimization problems with diverse boundary and loading conditions.\\
 
 **Features**
 **Physics-Informed Neural Networks (PINNs):** Embeds structural mechanics into the learning process for highly accurate predictions.
