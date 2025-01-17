@@ -187,7 +187,7 @@ try:
     with open("StructDataLite.json", "r") as f:
         data = json.load(f)
 except FileNotFoundError:
-    raise FileNotFoundError("The file 'StructDataLite.json' was not found.")
+    raise FileNotFoundError("The file 'training_data_PINN.json' was not found.")
 
 # Extract data
 roller_x       = data.get("roller_x_locations", [])
@@ -700,18 +700,6 @@ beam_y = 0
 beam_x = [0, L_beam]
 beam_y_vals = [beam_y, beam_y]
 
-pin_x = 0
-pin_y = beam_y  # Align the pin vertically with the beam
-pin_size = 0.25 # Increased size for better visibility
-pin_triangle = RegularPolygon(
-    (pin_x, pin_y - 0.75*pin_size),  # Position the pin slightly below the beam
-    numVertices=3,
-    radius=pin_size,
-    orientation=np.pi/0.5,  # Pointing upwards
-    color='red',
-    label='Pin'
-)
-
 # Collect force positions and values for plotting
 force_positions = []
 force_vals_plot = []
@@ -741,7 +729,7 @@ fig, ax = plt.subplots(figsize=(18, 7), dpi=300)
 
 # Plot Beam
 ax.plot(beam_x, beam_y_vals, color='black', linewidth=3, label='Beam')
-ax.add_patch(pin_triangle)
+ax.scatter(beam_x[0], beam_y - 0.15, marker='^', color='red', s=300, zorder=6)
 
 # Plot Rollers
 ax.scatter(unique_rollers, [beam_y]*len(unique_rollers),
