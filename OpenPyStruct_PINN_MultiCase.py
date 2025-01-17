@@ -1,7 +1,7 @@
-############################################################################
-#### OpenPyStruct FNN with Residual Blocks Based Multi Load Case Optimizer ####
-#### Coder: Danny Smyl, PhD, PE, Georgia Tech, 2025                     ####
-############################################################################
+################################################################################
+#### OpenPyStruct PINN with Residual Blocks Based Multi Load Case Optimizer ####
+#### Coder: Danny Smyl, PhD, PE, Georgia Tech, 2025                     ########
+################################################################################
 
 import os
 import json
@@ -883,26 +883,13 @@ def plot_beam_setup(ax, beam_x, beam_y_vals, unique_rollers,
     Plots the beam, rollers, pin, and optionally applied forces on the given axis.
     """
     # Create a unique pin_triangle for each subplot
-    pin_x = 0
-    pin_y = beam_y  # Align the pin vertically with the beam
-    pin_size = 0.15  # Size of the pin for better visibility
-    pin_triangle = RegularPolygon(
-        (pin_x, pin_y - 0.8*pin_size),  # Position the pin slightly below the beam
-        numVertices=3,
-        radius=pin_size,
-        orientation=np.pi/0.5,  # Pointing upwards
-        color='red',
-        label='Pin'
-    )
-    
-    # Plot Beam
-    ax.plot(beam_x, beam_y_vals, color='black', linewidth=3, label='Beam')
-    ax.add_patch(pin_triangle)
     
     # Plot Rollers
     ax.scatter(unique_rollers, [beam_y]*len(unique_rollers),
                marker='o', color='seagreen', s=200,
                label='Rollers', zorder=5, edgecolors='k')
+    
+    ax.scatter(beam_x[0], beam_y - 0.15, marker='^', color='red', s=300, zorder=6)
     
     # Plot Forces if required
     if plot_forces:
@@ -1070,7 +1057,7 @@ cbar_I.ax.tick_params(labelsize=10)
 # Set plot titles and labels
 ax_I.set_title("Beam Setup with Applied Forces and I",
              fontsize=18, fontweight='bold', pad=20)
-
+ax_I.set_ylabel("I (m$^4$)", fontsize=14, fontweight='semibold')
 ax_I.set_xlim(-5, L_beam + 5)
 ax_I.set_ylim(-2.5, 2.5)  # Adjusted to accommodate I blocks
 ax_I.set_xticks(np.arange(0, L_beam + 5, 5))
