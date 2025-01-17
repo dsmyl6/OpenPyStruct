@@ -192,7 +192,7 @@ try:
     with open("training_data_PINN_mini.json", "r") as f:
         data = json.load(f)
 except FileNotFoundError:
-    raise FileNotFoundError("The file 'training_data_PINN_mini.json' was not found.")
+    raise FileNotFoundError("The file 'StructDataLite.json' was not found.")
 
 # Extract data
 roller_x       = data.get("roller_x_locations", [])
