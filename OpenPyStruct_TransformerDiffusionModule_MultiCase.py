@@ -49,7 +49,7 @@ sigma_0 = 0.01              # Initial Gaussian noise for input
 gamma_noise = 0.90          # Decay rate for noise during training
 gamma = 0.95                # Learning rate scheduler decay rate
 initial_alpha = 0.5         # Initial alpha value for loss weighting
-c = 0.2                     # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
+c = 0.5                     # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
 
 # Additional diffusion & Transformer hyperparameters #
 num_transformer_layers = 2    # Number of Transformer encoder layers
