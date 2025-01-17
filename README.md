@@ -24,7 +24,7 @@ Installation
 
 pip install openseespy
 
-## **License**
+## **MIT Open License**
 
 Copyright <2025>  <Danny Smyl>
 
