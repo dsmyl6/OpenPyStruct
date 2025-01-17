@@ -36,17 +36,17 @@ n_cases = 6                 # Number of sub-cases per sample
 nelem = 100                 # Final output dimension per sample: (B, n_elem)
 box_constraint_coeff = 5e-1 # Coefficient for box constraint penalty
 hidden_units = 128          # Number of hidden units in MLP
-dropout_rate = 0.5          # Dropout rate for regularization
+dropout_rate = 0.4          # Dropout rate for regularization
 num_blocks = 2              # Number of blocks (unused in current model)
 num_epochs = 500            # Maximum number of training epochs
-batch_size = 1024            # Batch size for training
+batch_size = 128            # Batch size for training
 patience = 10               # Early stopping patience
-learning_rate = 3e-3        # Learning rate for optimizer
-weight_decay = 3e-3         # Weight decay (L2 regularization) for optimizer
+learning_rate = 1e-4        # Learning rate for optimizer
+weight_decay = 5e-3         # Weight decay (L2 regularization) for optimizer
 train_split = 0.8           # Fraction of data used for training
 sigma_0 = 0.01              # Initial Gaussian noise for input
 gamma_noise = 0.99          # Decay rate for noise during training
-gamma = 0.95                # Learning rate scheduler decay rate
+gamma = 0.975               # Learning rate scheduler decay rate
 initial_alpha = 0.5         # Initial alpha value for loss weighting
 c = 0.5                     # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
 
@@ -237,7 +237,7 @@ I_grouped         = I_values_pad.reshape(total_grouped, n_cases, -1)
 
 # Train/Validation Split
 indices   = np.random.permutation(total_grouped)
-train_sz  = int(train_split * total_grouped)
+train_sz  = np.int32(train_split * total_grouped)
 train_idx = indices[:train_sz]
 val_idx   = indices[train_sz:]
 
@@ -333,23 +333,19 @@ class ResidualBlock(nn.Module):
     """
     def __init__(self, input_dim, hidden_dim, dropout_rate):
         super(ResidualBlock, self).__init__()
-        self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.PReLU = nn.PReLU()
+        self.fc1 = nn.Linear(input_dim, input_dim)
+        self.LeakyReLU = nn.LeakyReLU(0.01)
         self.dropout = nn.Dropout(dropout_rate)
-        self.fc2 = nn.Linear(hidden_dim, input_dim)
-        self.dropout2 = nn.Dropout(dropout_rate)
         self.norm = nn.LayerNorm(input_dim)
 
     def forward(self, x):
         residual = x
         out = self.fc1(x)
-        out = self.PReLU(out)
+        out = self.LeakyReLU(out)
         out = self.dropout(out)
-        out = self.fc2(out)
-        out = self.dropout2(out)
         out += residual
         out = self.norm(out)
-        out = self.PReLU(out)
+        out = self.LeakyReLU(out)
         return out
 
 class FNNWithResidual(nn.Module):
@@ -366,7 +362,7 @@ class FNNWithResidual(nn.Module):
     ):
         super(FNNWithResidual, self).__init__()
         self.input_fc = nn.Linear(input_dim, hidden_dim)
-        self.PReLU = nn.PReLU()
+        self.LeakyReLU = nn.LeakyReLU(0.01)
         self.dropout = nn.Dropout(dropout_rate)
         self.residual_blocks = nn.ModuleList([
             ResidualBlock(hidden_dim, hidden_dim * 2, dropout_rate) 
@@ -376,7 +372,7 @@ class FNNWithResidual(nn.Module):
 
     def forward(self, x):
         out = self.input_fc(x)
-        out = self.PReLU(out)
+        out = self.LeakyReLU(out)
         out = self.dropout(out)
         for block in self.residual_blocks:
             out = block(out)
@@ -495,7 +491,7 @@ scaler_amp = GradScaler()  # 'cuda' device is inferred automatically
 
 # Setup live plotting for training progress
 plt.ion()
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(8, 6), dpi=300)
 
 def live_plot(epoch, train_losses, val_losses):
     """
@@ -505,7 +501,7 @@ def live_plot(epoch, train_losses, val_losses):
     - epoch: Current epoch number
     - train_losses: List of training losses up to current epoch
     - val_losses: List of validation losses up to current epoch
-    """
+    """ 
     ax.clear()
     ax.plot(range(1, epoch + 1), train_losses, label="Train Loss", marker='o', color='blue')
     ax.plot(range(1, epoch + 1), val_losses, label="Validation Loss", marker='x', color='red')
@@ -741,7 +737,7 @@ block_width = L_beam / nelem * 0.8  # Slightly narrower blocks for better visibi
 block_height = 1  # Maximum height for visualization
 
 # Create a single plot with extra space for the colorbar
-fig, ax = plt.subplots(figsize=(18, 7))
+fig, ax = plt.subplots(figsize=(18, 7), dpi=300)
 
 # Plot Beam
 ax.plot(beam_x, beam_y_vals, color='black', linewidth=3, label='Beam')
@@ -801,6 +797,7 @@ cbar = fig.colorbar(sm, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
 cbar.set_label('Predicted I (m$^4$)', fontsize=16)
 cbar.ax.tick_params(labelsize=10)
 
+
 # Set plot titles and labels
 ax.set_title("Beam Setup with Applied Forces and Predicted I",
              fontsize=22, fontweight='bold', pad=20)
@@ -808,7 +805,7 @@ ax.set_xlabel("Beam Length (m)", fontsize=16, fontweight='semibold')
 #ax.set_ylabel("Force Representation and Moments of Inertia, I (m$^4$)", fontsize=16, fontweight='semibold')
 ax.set_xlim(-5, L_beam + 5)
 ax.set_ylim(-2.5, 2.5)  # Adjusted to accommodate I blocks
-ax.set_xticks(np.arange(0, L_beam + 5, 5))
+ax.set_xticks(np.arange(0, L_beam + 25, 25))
 ax.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
 
 # Create custom legend
