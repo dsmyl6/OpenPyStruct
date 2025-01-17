@@ -189,7 +189,7 @@ def scale_user_inputs(
 
 # Load data
 try:
-    with open("StructDataLite.json.json", "r") as f:
+    with open("StructDataLite.json", "r") as f:
         data = json.load(f)
 except FileNotFoundError:
     raise FileNotFoundError("The file 'StructDataLite.json' was not found.")
