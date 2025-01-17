@@ -1,5 +1,5 @@
 ############################################################################
-#### OpenPyStruct FNN with Residual Blocks Based Multi Load Case Optimizer ####
+#### OpenPyStruct FNN with Residual Blocks Based Multi Load Case Optimizer #
 #### Coder: Danny Smyl, PhD, PE, Georgia Tech, 2025                     ####
 ############################################################################
 
