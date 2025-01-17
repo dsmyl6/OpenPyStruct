@@ -33,7 +33,7 @@ from torch.amp import autocast, GradScaler
 #######################################
 
 # Model and training configuration #
-n_cases = 6                # Number of sub-cases per sample
+n_cases = 6                 # Number of sub-cases per sample
 nelem = 100                 # Final output dimension per sample: (B, n_elem)
 box_constraint_coeff = 5e-1 # Coefficient for box constraint penalty
 hidden_units = 256          # Number of hidden units in MLP
@@ -49,7 +49,7 @@ sigma_0 = 0.01              # Initial Gaussian noise for input
 gamma_noise = 0.90          # Decay rate for noise during training
 gamma = 0.95                # Learning rate scheduler decay rate
 initial_alpha = 0.5         # Initial alpha value for loss weighting
-c = 0.2                   # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
+c = 0.2                     # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
 
 # Additional diffusion & Transformer hyperparameters #
 num_transformer_layers = 2    # Number of Transformer encoder layers
@@ -240,7 +240,7 @@ try:
     with open("StructDataLite.json", "r") as f:
         data = json.load(f)
 except FileNotFoundError:
-    raise FileNotFoundError("The file 'StructDataLite.json' was not found.")
+    raise FileNotFoundError("The file 'training_data_PINN.json' was not found.")
 
 # Extract data
 roller_x       = data.get("roller_x_locations", [])
@@ -290,7 +290,7 @@ I_grouped         = I_values_pad.reshape(total_grouped, n_cases, -1)
 
 # Train/Validation Split
 indices   = np.random.permutation(total_grouped)
-train_sz  = int(train_split * total_grouped)
+train_sz  = np.int32(train_split * total_grouped)
 train_idx = indices[:train_sz]
 val_idx   = indices[train_sz:]
 
@@ -901,17 +901,7 @@ beam_y = 0
 beam_x = [0, L_beam]
 beam_y_vals = [beam_y, beam_y]
 
-pin_x = 0
-pin_y = beam_y  # Align the pin vertically with the beam
-pin_size = 0.25 # Increased size for better visibility
-pin_triangle = RegularPolygon(
-    (pin_x, pin_y - 0.75*pin_size),  # Position the pin slightly below the beam
-    numVertices=3,
-    radius=pin_size,
-    orientation=np.pi/0.5,  # Pointing upwards
-    color='red',
-    label='Pin'
-)
+
 
 # Collect force positions and values for plotting
 force_positions = []
@@ -942,7 +932,7 @@ fig, ax = plt.subplots(figsize=(18, 7))
 
 # Plot Beam
 ax.plot(beam_x, beam_y_vals, color='black', linewidth=3, label='Beam')
-ax.add_patch(pin_triangle)
+ax.scatter(beam_x[0], beam_y - 0.15, marker='^', color='red', s=300, zorder=6)
 
 # Plot Rollers
 ax.scatter(unique_rollers, [beam_y]*len(unique_rollers),
