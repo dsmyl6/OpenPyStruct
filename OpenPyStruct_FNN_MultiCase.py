@@ -35,20 +35,20 @@ from torch.cuda.amp import autocast, GradScaler
 n_cases = 6                 # Number of sub-cases per sample
 nelem = 100                 # Final output dimension per sample: (B, n_elem)
 box_constraint_coeff = 5e-1 # Coefficient for box constraint penalty
-hidden_units = 110          # Number of hidden units in MLP
-dropout_rate = 0.425        # Dropout rate for regularization
-num_blocks = 2              # Number of blocks (unused in current model)
+hidden_units = 128          # Number of hidden units in MLP
+dropout_rate = 0.5          # Dropout rate for regularization
+num_blocks = 3              # Number of blocks (unused in current model)
 num_epochs = 500            # Maximum number of training epochs
 batch_size = 128            # Batch size for training
 patience = 10               # Early stopping patience
-learning_rate = 1e-4        # Learning rate for optimizer
-weight_decay = 5e-3         # Weight decay (L2 regularization) for optimizer
+learning_rate = 2e-4        # Learning rate for optimizer
+weight_decay = 1e-2         # Weight decay (L2 regularization) for optimizer
 train_split = 0.8           # Fraction of data used for training
-sigma_0 = 0.01              # Initial Gaussian noise for input
-gamma_noise = 0.99          # Decay rate for noise during training
-gamma = 0.975               # Learning rate scheduler decay rate
+sigma_0 = 0.03              # Initial Gaussian noise for input
+gamma_noise = 0.97          # Decay rate for noise during training
+gamma = 0.99                # Learning rate scheduler decay rate
 initial_alpha = 0.5         # Initial alpha value for loss weighting
-c = 0.5                     # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
+c = 1.0                     # Parameter to adjust label aggregation (higher c = more more conservative I estimate)
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
