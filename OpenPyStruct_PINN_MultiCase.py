@@ -53,7 +53,7 @@ gamma = 0.98                                            # Learning rate schedule
 initial_alpha = 0.5                                     # Initial alpha value for loss weighting
 c = 0.5                                                 # Parameter to adjust label aggregation (higher c = more conservative I estimate)
 
-penalty_pinn = 1e-6 #modify to scale pinn loss with data-driven loss
+penalty_pinn = 1.5e-6 #modify to scale pinn loss with data-driven loss
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -1057,7 +1057,7 @@ cbar_I.ax.tick_params(labelsize=10)
 # Set plot titles and labels
 ax_I.set_title("Beam Setup with Applied Forces and I",
              fontsize=18, fontweight='bold', pad=20)
-ax_I.set_ylabel("I (m$^4$)", fontsize=14, fontweight='semibold')
+
 ax_I.set_xlim(-5, L_beam + 5)
 ax_I.set_ylim(-2.5, 2.5)  # Adjusted to accommodate I blocks
 ax_I.set_xticks(np.arange(0, L_beam + 5, 5))
