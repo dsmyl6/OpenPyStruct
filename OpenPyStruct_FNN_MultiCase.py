@@ -35,8 +35,8 @@ from torch.cuda.amp import autocast, GradScaler
 n_cases = 6                 # Number of sub-cases per sample
 nelem = 100                 # Final output dimension per sample: (B, n_elem)
 box_constraint_coeff = 5e-1 # Coefficient for box constraint penalty
-hidden_units = 128          # Number of hidden units in MLP
-dropout_rate = 0.4          # Dropout rate for regularization
+hidden_units = 110          # Number of hidden units in MLP
+dropout_rate = 0.425        # Dropout rate for regularization
 num_blocks = 2              # Number of blocks (unused in current model)
 num_epochs = 500            # Maximum number of training epochs
 batch_size = 128            # Batch size for training
