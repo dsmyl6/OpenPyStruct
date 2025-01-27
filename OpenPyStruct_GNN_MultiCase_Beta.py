@@ -4,7 +4,7 @@
 ############################################################################
 
 
-#### EXPERIMENTAL CODE (WORKS BUT NOT OPTIMIZED ####
+#### EXPERIMENTAL CODE (FUNCTIONAL BUT NOT OPTIMIZED) ####
 
 import os
 import json
