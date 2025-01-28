@@ -7,7 +7,7 @@
 **Feedforward Neural Networks (FNNs):** Provides scalable solutions for simpler structural optimization tasks.\
 **Multi-Core and GPU-Accelerated Optimization:** Enables large-scale data generation and rapid computations.\
 **OpenSeesPy Integration:** Facilitates physics-based finite element simulations.\
-**Flexible Loss Functions and Parameter Design:** Supports user-defined constraints, objectives, and optimization goals.\
+**Flexible Loss Functions and Parameter Design:** Supports user-defined constraints, objectives, and optimization goals.
 
 ## **Requirements**
 Ensure you have Python 3.8+ installed. The required libraries include:
