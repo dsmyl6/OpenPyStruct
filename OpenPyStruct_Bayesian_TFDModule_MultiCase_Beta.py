@@ -382,7 +382,7 @@ class DiffusionSchedule:
     """
     Defines the diffusion schedule for adding noise.
     """
-    def __init__(self, T, beta_start=1e-12, beta_end=1e-4):
+    def __init__(self, T, beta_start=1e-12, beta_end=1e-5):
         self.T = T
         self.beta = torch.linspace(beta_start, beta_end, T)
         self.alpha = 1.0 - self.beta
