@@ -8,13 +8,17 @@
   - [**Table of Contents**](#table-of-contents)
   - [**Features**](#features)
   - [**Requirements**](#requirements)
-    - [**Install OpenSeesPy**](#install-openseespy)
-    - [**Conda Environment Install**](#conda-environment-install)
-  - [**Code Documentation**](#code-documentation)
-    - [**OpenPyStruct Single Load Optimizer**](#openpystruct-single-load-optimizer)
+    - [Option 1, Manual Install](#option-1-manual-install)
+    - [Option 2, Conda Environment Install](#option-2-conda-environment-install)
+  - [**Script Usage Documentation**](#script-usage-documentation)
+    - [**Single Load Optimizer**](#single-load-optimizer)
       - [**Overview**](#overview)
       - [**Key Features**](#key-features)
       - [**Workflow**](#workflow)
+    - [**Physics-Informed Neural Network MultiCase**](#physics-informed-neural-network-multicase)
+      - [**Overview**](#overview-1)
+      - [**Key Features**](#key-features-1)
+      - [**Workflow**](#workflow-1)
   - [**Contributor Guide**](#contributor-guide)
   - [**License**](#license)
 
@@ -33,29 +37,33 @@
 
 ## **Requirements**
 
-### **Install OpenSeesPy**
+**Edvard Notes:**
+- Should we specify package versions?
+- Does this work on macOS, or just Windows? We should clarify this.
 
-Ensure you have Python 3.8+ installed. First, install OpenSeesPy:
+### Option 1, Manual Install
+
+Create a new conda environment with python 3.8+ installed
+
+```zsh
+conda install python=3.8
+```
+
+First, install OpenSeesPy:
 
 ```zsh
 pip install openseespy
 ```
 
-The required dependencies include:
+Install rest of packages
 
-- `numpy`
-- `torch`
-- `matplotlib`
-- `seaborn`
-- `scikit-learn`
-- `openseespy`
+```zsh
+conda install numpy, torch, matplotlib, seaborn, scikit-learn
+```
 
-**Notes:**
-- Should we replace this with a Conda environment installation?
-- Should we specify package versions?
-- Does this work on macOS, or just Windows? We should clarify this.
 
-### **Conda Environment Install**
+
+### Option 2, Conda Environment Install
 
 To create a Conda environment with all dependencies, run:
 
@@ -66,9 +74,11 @@ conda activate OpenPyStruct
 
 ---
 
-## **Code Documentation**
+## **Script Usage Documentation**
 
-### **OpenPyStruct Single Load Optimizer**
+### **Single Load Optimizer**
+
+ [Link to file in repo](./OpenPyStruct_BeamOpt.py)
 
 #### **Overview**
 
@@ -115,6 +125,23 @@ This script optimizes the **moment of inertia distribution** along a beam to min
    - Plot **loss history** over optimization epochs
    - Display **beam deformation, moment of inertia distribution, shear forces, and bending moments**
    - Highlight **support locations and applied forces**
+
+
+### **Physics-Informed Neural Network MultiCase**
+
+#### **Overview**
+
+to write
+
+#### **Key Features**
+
+to write
+
+#### **Workflow**
+
+to write
+
+
 
 ---
 
