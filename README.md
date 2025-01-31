@@ -10,6 +10,11 @@
 **Flexible Loss Functions and Parameter Design:** Supports user-defined constraints, objectives, and optimization goals.
 
 ## **Requirements**
+
+Notes:
+- do we want to delete this in favor of conda env install?
+- Should we specify package versions also?
+
 Ensure you have Python 3.8+ installed. The required libraries include:
 
 numpy\
@@ -25,6 +30,7 @@ Installation
 
 pip install openseespy
 
+## **Conda Environement Install**
 ```zsh
 conda env create -f environment.yml
 conda activate OpenPyStruct
