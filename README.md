@@ -20,9 +20,15 @@ scikit-learn\
 openseespy\
 Installation
 
+
 ## **Install openseespy first:**
 
 pip install openseespy
+
+```zsh
+conda env create -f environment.yml
+conda activate OpenPyStruct
+```
 
 ## **MIT Open License**
 
