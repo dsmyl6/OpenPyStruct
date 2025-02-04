@@ -11,17 +11,21 @@ boundary and loading conditions.
   - [**Table of Contents**](#table-of-contents)
   - [**Features**](#features)
   - [**Requirements**](#requirements)
-    - [Option 1, Manual Install](#option-1-manual-install)
-    - [Option 2, Conda Environment Install](#option-2-conda-environment-install)
-  - [**Script Usage Documentation**](#script-usage-documentation)
-    - [**Single Load Optimizer**](#single-load-optimizer)
-      - [**Overview**](#overview)
-      - [**Key Features**](#key-features)
-      - [**Workflow**](#workflow)
+  - [**BeamOpt Usage**](#beamopt-usage)
+    - [**Overview**](#overview)
+    - [**Key Features**](#key-features)
+    - [**How to Use**](#how-to-use)
+      - [1. Set Parameters](#1-set-parameters)
+      - [2. Model Setup](#2-model-setup)
+      - [3. Loss Calculation](#3-loss-calculation)
+      - [4. Optimization Loop](#4-optimization-loop)
+      - [5. Visualizing Results](#5-visualizing-results)
+      - [6. Final Results](#6-final-results)
+      - [Example Execution](#example-execution)
     - [**Physics-Informed Neural Network MultiCase**](#physics-informed-neural-network-multicase)
       - [**Overview**](#overview-1)
       - [**Key Features**](#key-features-1)
-      - [**Workflow**](#workflow-1)
+      - [**How to Use**](#how-to-use-1)
   - [**Contributor Guide**](#contributor-guide)
   - [**MIT License**](#mit-license)
 
@@ -43,32 +47,7 @@ boundary and loading conditions.
 
 ## **Requirements**
 
-**Edvard Notes:**
-
-- Should we specify package versions?
-- Does this work on macOS, or just Windows? We should clarify this.
-
-### Option 1, Manual Install
-
-Create a new conda environment with python 3.8+ installed
-
-```zsh
-conda install python=3.8
-```
-
-First, install OpenSeesPy:
-
-```zsh
-pip install openseespy
-```
-
-Install rest of packages
-
-```zsh
-conda install numpy, torch, matplotlib, seaborn, scikit-learn
-```
-
-### Option 2, Conda Environment Install
+Windows 10+ (this does not work on Mac)
 
 To create a Conda environment with all dependencies, run:
 
@@ -79,19 +58,17 @@ conda activate OpenPyStruct
 
 ---
 
-## **Script Usage Documentation**
-
-### **Single Load Optimizer**
+## **BeamOpt Usage**
 
 [Link to file in repo](./OpenPyStruct_BeamOpt.py)
 
-#### **Overview**
+### **Overview**
 
 This script optimizes the **moment of inertia distribution** along a beam to minimize structural response (e.g.,
 deflection, internal forces) while maintaining structural efficiency. The optimization iteratively adjusts the moment of
 inertia of beam elements to reduce bending and shear energy losses.
 
-#### **Key Features**
+### **Key Features**
 
 - **OpenSeesPy-based** finite element analysis.
 - **PyTorch-powered** gradient-based optimization.
@@ -101,41 +78,95 @@ inertia of beam elements to reduce bending and shear energy losses.
 - Implements **early stopping** for computational efficiency.
 - **Visualization** of optimization progress and structural response.
 
-#### **Workflow**
+### **How to Use**
 
-1. **Define Model Parameters:**
+Below is an explanation of how to use the code.
 
-   - Material properties (Young’s modulus, Poisson’s ratio)
-   - Beam geometry (length, cross-section)
-   - Boundary conditions (roller and pinned supports)
-   - Loading conditions (point loads, distributed loads)
+#### 1. Set Parameters
 
-2. **Set Up the Finite Element Model:**
+The code requires defining several parameters before running the optimization loop. These parameters control the beam's
+properties, loads, and optimization settings. Below is an explanation of the key parameters:
 
-   - Define nodes and elements in **OpenSeesPy**
-   - Apply supports and loads
-   - Assign varying moment of inertia values
+- `E`: Young's Modulus (Pa)
+- `nu`: Poisson's ratio
+- `G`: Shear modulus (Pa)
+- `A`: Cross-sectional area (m²)
+- `L`: Length of the beam (m)
+- `num_nodes`: Number of nodes in the beam
+- `num_elements`: Number of beam elements (determined by `num_nodes`)
+- `N_rollers`: Number of additional roller supports
+- `M_forces`: Number of point forces applied
+- `L_min`: Minimum distance between roller supports (m)
+- `max_force`: Maximum point load applied to the beam (N)
+- `uniform_udl`: Uniformly distributed load (N/m)
+- `I_0`: Initial guess for the moments of inertia for each element
 
-3. **Optimize the Moment of Inertia:**
+Optimization parameters include:
 
-   - Use **Adam optimizer** with **exponential learning rate decay**
-   - Compute loss as a combination of:
-     - **Primary loss:** Total moment of inertia
-     - **Bending energy loss:** Based on internal moments
-     - **Shear energy loss:** Based on shear forces
-   - Update inertia values using **gradient descent**
-   - Clamp inertia values to prevent negative values
-   - Implement **early stopping** if loss stagnates
+- `num_epochs`: Number of epochs to run the optimization
+- `lr`: Learning rate for the optimizer
+- `gamma`: Learning rate decay rate
+- `alpha_moment`: Coefficient for the bending energy loss term
+- `alpha_shear`: Coefficient for the shear energy loss term
 
-4. **Run Finite Element Analysis (FEA):**
+#### 2. Model Setup
 
-   - Perform static analysis in **OpenSeesPy**
-   - Extract **deflections, rotations, shear forces, and bending moments**
+The model setup is handled by the `setup_model()` function. It uses the following inputs:
 
-5. **Visualization and Results:**
-   - Plot **loss history** over optimization epochs
-   - Display **beam deformation, moment of inertia distribution, shear forces, and bending moments**
-   - Highlight **support locations and applied forces**
+- `I_tensor`: Current values for the moments of inertia for each beam element.
+- `node_positions`: The positions of nodes along the beam (generated by `np.linspace`).
+- `roller_nodes`: List of nodes with roller supports.
+- `force_nodes`: List of nodes where point forces are applied.
+- `force_values`: Corresponding forces applied to each node.
+- `A`, `E`, `uniform_udl`: The cross-sectional area, Young's Modulus, and uniform distributed load.
+
+The model is built in OpenSees, defining the beam nodes, supports, elements, point loads, and the uniform load. It also
+sets up the analysis parameters for static analysis.
+
+#### 3. Loss Calculation
+
+The `compute_combined_loss()` function computes the total loss, which is the sum of:
+
+- The **primary loss**, which minimizes the sum of the moments of inertia across all elements.
+- **Bending energy loss**, which is proportional to the square of the bending moments.
+- **Shear energy loss**, which is proportional to the square of the shear forces.
+
+These losses are used to guide the optimization process.
+
+#### 4. Optimization Loop
+
+The optimization loop iterates over `num_epochs`, optimizing the moments of inertia (`I_tensor`) using the Adam
+optimizer. At each epoch, the following steps are performed:
+
+1. The OpenSees model is wiped and rebuilt with updated `I_tensor`.
+2. The model undergoes a static analysis.
+3. The combined loss is computed.
+4. Backpropagation is performed, and the optimizer updates the `I_tensor`.
+5. A learning rate scheduler (`ExponentialLR`) adjusts the learning rate for smoother convergence.
+6. The moments of inertia are clamped to ensure they remain positive.
+
+The loop checks for convergence by monitoring the loss. If the loss does not improve for `patience` epochs, the
+optimization is stopped early.
+
+#### 5. Visualizing Results
+
+After the optimization loop, the optimized moments of inertia (`I_values`) are used to generate the following plots:
+
+- **Beam Element Cross-Sectional Heights**: Plots the beam's sections with varying thickness based on the optimized
+  moments of inertia.
+- **Shear Force Diagram**: Plots the shear forces along the length of the beam.
+- **Bending Moment Diagram**: Plots the bending moments along the length of the beam.
+
+These visualizations help analyze the beam's performance after optimization.
+
+#### 6. Final Results
+
+At the end of the optimization, the optimized moments of inertia are saved and can be used for further analysis or
+design. The shear forces and bending moments are converted to kN and kN·m, respectively, for easier interpretation.
+
+#### Example Execution
+
+TBD
 
 ### **Physics-Informed Neural Network MultiCase**
 
@@ -147,7 +178,7 @@ to write
 
 to write
 
-#### **Workflow**
+#### **How to Use**
 
 to write
 
@@ -155,12 +186,17 @@ to write
 
 ## **Contributor Guide**
 
-Edvard note: To ensure uniform coding standards, suggest setting up **pre-commit hooks** and linting tools:
+To maintain consistency and improve code quality across the project, we recommend setting up pre-commit hooks and using
+linting tools formatted with the provided config files. These tools will help ensure that your contributions adhere to
+the established coding standards for both Python and markdown documentation.
 
-- **Flake8** for Python style enforcement.
-- Markdown style enforcement via **prettier** or **markdownlint**.
+The extensions required are specified in `.vscode\extensions.json` file
 
-Do you want me to set this up, let me know!
+With the right conda environment activated, run:
+
+```zsh
+pre-commit install
+```
 
 ---
 
