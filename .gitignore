@@ -1,0 +1,156 @@
+# ======================
+# Project-Specific Rules
+# ADD MORE HERE AS NEEDED
+# ======================
+*.3dmbak
+*.rhl
+*.stlbak
+.DS_Store
+
+# ======================
+# Python Bytecode Files
+# ======================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ======================
+# Compiled Extensions
+# ======================
+*.so
+
+# ======================
+# Distribution/Packaging
+# ======================
+.Python
+build/
+dist/
+develop-eggs/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ======================
+# PyInstaller Files
+# ======================
+*.manifest
+*.spec
+
+# ======================
+# Logs and Debugging
+# ======================
+pip-log.txt
+pip-delete-this-directory.txt
+*.log
+
+# ======================
+# Unit Test and Coverage Reports
+# ======================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ======================
+# Localization Files
+# ======================
+*.mo
+*.pot
+
+# ======================
+# Framework-Specific
+# ======================
+
+# Django
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+instance/
+.webassets-cache
+
+# Scrapy
+.scrapy
+
+# Sphinx Documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# ======================
+# Jupyter and IPython
+# ======================
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# ======================
+# Virtual Environments
+# ======================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# ======================
+# Dependency Managers
+# ======================
+# Pipenv
+# Uncomment Pipfile.lock if you want to exclude it
+# Pipfile.lock
+
+# PEP 582 (PyFlow)
+__pypackages__/
+
+# ======================
+# Task Runners and Tools
+# ======================
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Rope
+.ropeproject
+
+# Spyder
+.spyderproject
+.spyproject
+
+# MkDocs
+/site
+
+# ======================
+# Type Checkers
+# ======================
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/

@@ -1,0 +1,32 @@
+# .prettierrc.yaml
+# This configuration file is used by Prettier to automatically format Markdown files.
+# The rules specified here ensure that the formatting is consistent and meets project guidelines.
+
+# Rule: trailingComma
+# Controls whether to add a trailing comma in objects, arrays, and other multi-line structures.
+# "es5" means trailing commas will be added where valid in ECMAScript 5 (e.g., after the last item in an object or array).
+trailingComma: 'es5'
+
+# Rule: tabWidth
+# Sets the number of spaces per indentation level. In this case, we're using 2 spaces per indentation level.
+tabWidth: 2
+
+# Rule: semi
+# Controls whether to add semicolons at the ends of statements.
+# "false" disables semicolons, so they won't be added unless required by the syntax.
+semi: false
+
+# Rule: singleQuote
+# Controls whether to use single quotes instead of double quotes for strings.
+# "true" forces Prettier to use single quotes wherever possible (e.g., 'Hello' instead of "Hello").
+singleQuote: true
+
+# Rule: printWidth
+# Sets the maximum line length that Prettier will enforce. Lines longer than this will be wrapped.
+# Here, the maximum line length is set to 120 characters.
+printWidth: 120
+
+# Rule: proseWrap
+# Controls how Prettier wraps prose (Markdown text).
+# "always" ensures that all lines in Markdown files are wrapped, even if they are shorter than the printWidth.
+proseWrap: 'always'

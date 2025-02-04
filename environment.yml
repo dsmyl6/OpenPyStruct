@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.8
+  - pre-commit==3.3.2
   - numpy
   - pytorch
   - matplotlib

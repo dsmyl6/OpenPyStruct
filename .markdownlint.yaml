@@ -1,0 +1,16 @@
+# .markdownlint.yaml
+# This configuration file is used to enforce style guidelines for Markdown files.
+# The rules specified here will help ensure consistency and readability of the content.
+
+# Rule: MD024
+# Enforces consistent heading levels. This setting ensures that headings are sequential and sibling headings are not skipped.
+# "siblings_only: true" enforces that headings should only skip levels within the same block of content (e.g., H2 -> H3),
+# but not across different blocks (e.g., H1 -> H3).
+MD024:
+  siblings_only: true
+
+# Rule: MD013
+# Controls the maximum line length in Markdown files. Lines longer than this length will trigger a warning.
+# The value "120" sets the maximum allowed line length to 120 characters.
+MD013:
+  line_length: 120

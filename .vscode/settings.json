@@ -1,0 +1,30 @@
+{
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/.vscode/.env",
+    //
+    //INTEGRATED TERMINAL
+    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.profiles.windows": {
+        "Command Prompt NEW": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        }
+    },
+    "files.exclude": {
+        "**/.git": false
+    },
+    //
+    //CODE FORMATTING
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+}

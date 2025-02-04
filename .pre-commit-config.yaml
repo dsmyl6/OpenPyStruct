@@ -1,0 +1,21 @@
+# .pre-commit-config.yaml
+# This configuration file specifies the hooks used by the pre-commit framework.
+# These hooks automatically run linters and formatters on code changes before they are committed.
+# The repositories listed here are where the hooks are sourced from.
+
+repos:
+  # Repository for Black, a Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 23.3.0 # Specifies the version of Black to use
+    hooks:
+      # Hook for running the Black code formatter
+      - id: black
+        args: ['--config=pyproject.toml'] # Specifies the configuration file for Black's settings
+        language_version: python # Specifies the language version to use for the hook (Python in this case)
+
+  # Repository for Flake8, a Python linter that checks for code style issues and errors
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0 # Specifies the version of Flake8 to use
+    hooks:
+      # Hook for running Flake8 linter
+      - id: flake8 # The identifier for the Flake8 hook
