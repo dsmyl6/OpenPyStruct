@@ -10,7 +10,7 @@
   - [**Requirements**](#requirements)
     - [Option 1, Manual Install](#option-1-manual-install)
     - [Option 2, Conda Environment Install](#option-2-conda-environment-install)
-  - [**Script Usage Documentation**](#script-usage-documentation)
+  <!-- - [**Script Usage Documentation**](#script-usage-documentation)
     - [**Single Load Optimizer**](#single-load-optimizer)
       - [**Overview**](#overview)
       - [**Key Features**](#key-features)
@@ -18,19 +18,20 @@
     - [**Physics-Informed Neural Network MultiCase**](#physics-informed-neural-network-multicase)
       - [**Overview**](#overview-1)
       - [**Key Features**](#key-features-1)
-      - [**Workflow**](#workflow-1)
-  - [**Contributor Guide**](#contributor-guide)
+      - [**Workflow**](#workflow-1) 
+  - [**Contributor Guide**](#contributor-guide) -->
   - [**License**](#license)
 
 ---
 
 ## **Features**
 
-- **Physics-Informed Neural Networks (PINNs):** Embeds structural mechanics into the learning process for highly accurate predictions.
-- **Transformer-Diffusion Modules:** Incorporates advanced attention mechanisms and diffusion-based techniques for modeling complex structural behavior.
-- **Feedforward Neural Networks (FNNs):** Provides scalable solutions for simpler structural optimization tasks.
-- **Multi-Core and GPU-Accelerated Optimization:** Enables large-scale data generation and rapid computations.
+- **Classical Model-Based Structural Optimizers:** Used for generating training data
 - **OpenSeesPy Integration:** Facilitates physics-based finite element simulations.
+- **Multi-Core and GPU-Accelerated Optimization:** Enables large-scale data generation and rapid computations.
+- **Physics-Informed Neural Networks (PINNs) - ML Structural Optimization:** Embeds structural mechanics into the learning process for highly accurate predictions.
+- **Transformer-Diffusion Modules - ML Structural Optimization:** Incorporates advanced attention mechanisms and diffusion-based techniques for modeling complex structural behavior.
+- **Feedforward Neural Networks (FNNs) - ML Structural Optimization:** Provides scalable solutions for simpler structural optimization tasks.
 - **Flexible Loss Functions and Parameter Design:** Supports user-defined constraints, objectives, and optimization goals.
 
 ---
@@ -70,7 +71,7 @@ conda activate OpenPyStruct
 ```
 
 ---
-
+<!--
 ## **Script Usage Documentation**
 
 ### **Single Load Optimizer**
@@ -90,6 +91,8 @@ This script optimizes the **moment of inertia distribution** along a beam to min
 - Optimizes **moment of inertia** to minimize structural energy loss.
 - Implements **early stopping** for computational efficiency.
 - **Visualization** of optimization progress and structural response.
+
+
 
 #### **Workflow**
 
@@ -134,7 +137,7 @@ Edvard note: To ensure uniform coding standards, suggest setting up **pre-commit
 - **Flake8** for Python style enforcement.
 - Markdown style enforcement via **prettier** or **markdownlint**.
 
-Do you want me to set this up, let me know!
+Do you want me to set this up, let me know! -->
 
 ---
 
