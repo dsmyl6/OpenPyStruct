@@ -37,9 +37,6 @@
 
 ## **Requirements**
 
-**Edvard Notes:**
-- Should we specify package versions?
-- Does this work on macOS, or just Windows? We should clarify this.
 
 ### Option 1, Manual Install
 
