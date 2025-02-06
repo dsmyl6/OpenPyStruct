@@ -127,20 +127,6 @@ This script optimizes the **moment of inertia distribution** along a beam to min
    - Highlight **support locations and applied forces**
 
 
-### **Physics-Informed Neural Network MultiCase**
-
-#### **Overview**
-
-to write
-
-#### **Key Features**
-
-to write
-
-#### **Workflow**
-
-to write
-
 
 
 ---
